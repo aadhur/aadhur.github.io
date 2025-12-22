@@ -1,2 +1,12 @@
-# aadhur.github.io
-My blog where I document my learning process in things I find interesting.
+# ~/notes Blog
+
+This is my personal blog where I document my learning journey in topics that interest me — ranging from machine learning to data visualization and cybersecurity.
+
+## Tech Stack
+- **HTML** 
+- **CSS** 
+- **D3.js** – Data visualization
+- **KaTeX** – Math typesetting
+
+## Live Blog
+🔗 [Visit my blog](https://aadhur.github.io/)
