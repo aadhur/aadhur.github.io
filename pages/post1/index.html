@@ -42,7 +42,7 @@
                 <span id="mse-value" class="mse-highlight">Calculating...</span>
             </p>
             The model here is the <strong>line equation of best fit</strong>. In simple words, the line that touches the most points.
-            <br>The math behind this is just trying to figure out the w and b for which MSE is at the lowest.
+            <br>The math behind this, is just trying to figure out the w and b for which MSE is at the lowest.
             <br><br> We will look at this in detail below.
         </div>
         <div class="viz-pane">
@@ -54,12 +54,12 @@
     <h2>1. The Concept</h2>
     <p>
         Regression in Machine Learning is a method to predict <span class="highlight">continuous values</span> of a target variable.
-        In simple terms: predicting the price of a house based on its size using its previous data of house prices and sizes.
+        In simple terms: predicting the price of a new house based on its size using its previous data of house prices and sizes.
         We do this by finding a pattern in the data.
     </p>
    
     <p class="punchline">
-        Linear Regression is when that pattern is just a <strong>line. </strong>
+        Linear Regression is when that pattern is a <strong>line. </strong>
     </p>
     <div class="math-block">
             <span class="label">School Math:</span>
@@ -75,7 +75,7 @@
             <span>b = bias (offset)</span>
     </div>
     <p>
-        Building the model is simply figuring out the <strong>[ w ]</strong> and <strong>[ b ]</strong>
+        Building the model is just simply figuring out the <strong>[ w ]</strong> and <strong>[ b ]</strong>
         that best fit our data. This is where the math comes in.
     </p>
     <h3>1.5 Initialization (The Guess)</h3>
@@ -98,7 +98,7 @@
         Now, we have a rough line of equation. How good can our line predict Y for a new data point X? <br>Where does it predict it wrong? How wrong?
         <br><br>There is sometimes a gap between the line and the actual dot. This is the<span class="highlight"><strong>Error</strong> or <strong>Residual</strong></span>. 
         (You can see the red line in the above graph).
-        We use this to grade our line. <br><br>Like how grades have different forms: marks, percentages, gpas. <br>We have different ways to calculate this loss. These are called Loss/Cost functions.
+        We use this to grade our line. <br><br>Like how grades have different forms: marks, percentages, gpas etc... <br>We have different ways to calculate this loss. These are called Loss/Cost functions.
     </p>
     <p>But for now, let's focus on one of them: MSE(Mean Squared Error)</p>
    
@@ -124,7 +124,7 @@
         </div>
     </div>
     <p>
-        If we translate that into proper Math notation, it looks like this:
+        If we translate that into proper math notation, it looks like this:
     </p>
    
     <div class="math-block" style="border:2px solid #4c7273;width: 200px;">
@@ -141,7 +141,7 @@
             So, by this, we will have our best line which will best represent our data.
         </p>
         <p>
-            But, How can we know the next value of w and b? This is where Gradient Descent comes in.
+            But, how can we know the next best ('better') value of w and b? This is where Gradient Descent comes in.
         </p>
         <div class="math-block" style="border-left-color: #641159;">
         w_new = w_old - learning_rate * - gradient <br>
@@ -203,7 +203,7 @@
         $$ w_{\text{new}} = w_{\text{old}} - \alpha * \left( -\frac{2}{n} \sum x (y - \hat{y}) \right) $$
         $$ b_{\text{new}} = b_{\text{old}} - \alpha * \left( -\frac{2}{n} \sum (y - \hat{y}) \right) $$
         </div>
-        <br> We keep finding the new values with the previous ones for a number of times (<strong>Iterations or Epochs</strong>) until we reach the lowest MSE, after which, any calculation done will only increase the MSE.
+        <br> We will keep finding the new values using the previous ones for a number of times (<strong>Iterations or Epochs</strong>) until we reach the lowest MSE, after which, any calculation done will only increase the MSE.
         So, the last iteration which gives our w and b: our model essentially.
     <h2>Coding it from Scratch:</h2>
     Now that the general math is down, converting it to code is the next step. <br>
@@ -214,7 +214,7 @@
         X = np.array(range(1, 31))
         y = np.array([3 * x + 10 + random.uniform(-5, 5) for x in X])
     </code></pre>
-    Coding Linear Regression from scratch predominantly requires 3 functions:
+    Coding Linear Regression from scratch requires 3 functions:
     <h3> 1. Loss function: </h3>
      <pre><code>
         def compute_loss(X, y, w, b):
@@ -337,7 +337,6 @@
     </ol>
     <p>
     I will continue updating this post as I learn more about them, as either sub posts or by editing this one. <br>
-    (PS:Currently, I am trying to understand gradient descent enough to code it in d3.js)
     </p>
     <p style="font-size: 18px;">
         Thank you for reading. <br>
