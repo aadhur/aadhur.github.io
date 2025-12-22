@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>~/notes</title>
+    <link rel="stylesheet" href="home_style.css">
+</head>
+<body>
+    <h1>~/notes</h1>
+    <p class="intro">A documentation of my learning curve in ml, cyber, and all things I find interesting.</p>
+
+    <div class="base64-corner">
+        SGVyZSBpcyBhIHNtYWxsIGZhY3Q6IFlvdSBhcmUgZ29pbmcgdG8gZGll
+    </div>
+    <!--Ref: The Book Thief-->
+
+    <div class="binary-corner">
+        22 44 6f 6e 27 74 20 79 6f 75 20 77 61 6e 74 20 74 6f 20 62 65 20 61 6c 69 76 65 20 62 65 66 6f 72 65 20 79 6f 75 20 64 69 65 3f 22 0d 0a 0d 0a
+    </div>
+    <!--Ref: All the light we cannot see-->
+
+    <div class="posts-section">
+        <div class="post">
+            <a href="pages/post1.html">./Linear Regression: ML's Hello World.</a>
+            <div class="description">Learn the math and write the code: Building the model from scratch with me.</div>
+            <div class="post-date">Uploaded on: 22 Dec 2025</div>
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="footer-disclaimer">
+            <div class="disclaimer-toggle" id="disclaimer-toggle">disclaimer.txt</div>
+            <div class="disclaimer-content" id="disclaimer-content">
+                All content provided here is for <strong>educational purposes only</strong>.<br>
+                Thank you for your time.
+                I'm always open to feedback (positive or negative). Let's learn together.
+            </div>
+        </div>
+        <div class="footer-links">
+            <a href="https://github.com/aadhur" target="_blank">GitHub</a>
+            <a href="https://www.linkedin.com/in/aadhurshini-18b081344/" target="_blank">LinkedIn</a>
+        </div>
+        <div>© AADHURSHINI - 2025</div>
+    </footer>
+
+    <script>
+        const toggle = document.getElementById('disclaimer-toggle');
+        const content = document.getElementById('disclaimer-content');
+
+        toggle.addEventListener('click', () => {
+            content.classList.toggle('open');
+        });
+    </script>
+
+
+</body>
+</html>

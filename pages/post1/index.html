@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>./Linear Regression</title>
+    <link rel="stylesheet" href="post1_style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ]
+        });">
+    </script>
+</head>
+<body>
+    <a href="../index.html" class="back-link">[ < ] Homepage</a>
+    <h1 style="font-family:'JetBrains Mono', monospace;">Linear Regression: ML's Hello World.</h1>
+    <p>Adjust the slope (w) and intercept (b) to fit the line to the data points.</p>
+   
+    <div class="interactive-container">
+        <div class="controls-pane">
+            <div style="margin-bottom: 20px;">
+                <label for="slope">Slope (w): </label>
+                <input type="range" id="slope" min="-5" max="5" step="0.1" value="1">
+                <div style="text-align: right; color: #3d7375; font-family: monospace;">w = <span id="slope-value">1</span></div>
+            </div>
+           
+            <div style="margin-bottom: 20px;">
+                <label for="intercept">Intercept (b): </label>
+                <input type="range" id="intercept" min="-10" max="10" step="0.1" value="0">
+                <div style="text-align: right; color: #3d7375; font-family: monospace;">b = <span id="intercept-value">0</span></div>
+            </div>
+           
+            <p>Equation:<br>
+                <span style="font-size: 1.2em; color: #3d7375;">y = <span id="w-text">1</span>x + <span id="b-text">0</span></span>
+            </p>
+            <p>Mean Squared Error (MSE):<br>
+                <span id="mse-value" class="mse-highlight">Calculating...</span>
+            </p>
+            The model here is the <strong>line equation of best fit</strong>. In simple words, the line that touches the most points.
+            <br>The math behind this is just trying to figure out the w and b for which MSE is at the lowest.
+            <br><br> We will look at this in detail below.
+        </div>
+        <div class="viz-pane">
+            <svg viewBox="0 0 600 400"></svg>
+        </div>
+    </div>
+
+    <section class="concept-section">
+    <h2>1. The Concept</h2>
+    <p>
+        Regression in Machine Learning is a method to predict <span class="highlight">continuous values</span> of a target variable.
+        In simple terms: predicting the price of a house based on its size by its previous data of house prices and sizes.
+        We do this by finding a pattern in the data.
+    </p>
+   
+    <p class="punchline">
+        Linear Regression is when that pattern is just a <strong>line. </strong>
+    </p>
+    <div class="math-block">
+            <span class="label">School Math:</span>
+            <span class="equation">Y = mX + c</span>
+
+            <br><span>m = slope</span> <br>
+            <span>c = intercept</span>
+
+        <div class="divider"></div>
+            <span class="label">Machine Learning:</span>
+            <span class="equation">Y = wX + b</span>
+            <br><span>w = weight (importance)</span><br>
+            <span>b = bias (offset)</span>
+    </div>
+    <p>
+        Building the model is simply figuring out the <strong>[ w ]</strong> and <strong>[ b ]</strong>
+        that best fit our data. This is where the math comes in.
+    </p>
+    <h3>1.5 Initialization (The Guess)</h3>
+    <p>
+        Like everything, we need a starting point. Before the model learns anything,
+        it has to make a default guess.
+    </p>
+    <div class="math-block" style="border-left-color: #641159;">
+        <div class="math-row">
+            <span class="label">INITIAL STATE:</span>
+            <span class="equation">w = 0(or 1), b = 0(or 1)</span>
+        </div>
+    </div>
+    <p>
+        Now, we plug these into our equation ($y = wx + b$) to make a prediction for
+        <strong>every</strong> $x$ data point we have.
+    </p>
+    <h2>2. The Cost Function (MSE)</h2>
+    <p>
+        Now, we have a rough line of equation. How good can our line predict Y for a new data point X? <br>Where does it predict it wrong? How wrong?
+        <br><br>There is sometimes a gap between the line and the actual dot. This is the<span class="highlight"><strong>Error</strong> or <strong>Residual</strong></span>. 
+        (You can see the red line in the above graph).
+        We use this to grade our line. <br><br>Like how grades have different forms: marks, percentages, gpas. <br>We have different ways to calculate this loss. These are called Lost/Cost functions.
+    </p>
+    <p>But for now, let's focus on one of them: MSE(Mean Squared Error)</p>
+   
+    <div class="math-block">
+        <div class="math-row">
+            <span class="label">1. THE ERROR:</span>
+            <span class="equation">$$ ( \text{Predicted Y} - \text{Actual Y} ) $$</span>
+        </div>
+       
+        <div class="math-row">
+            <span class="label">2. SQUARE IT:</span>
+            <span class="equation">$$ ( \text{Predicted Y} - \text{Actual Y} )^2 $$</span>
+        </div>
+        <div style="margin-left: 160px;">
+            <span>* We square it so negatives become positives. Otherwise, they might just cancel one another.</span>
+        </div>
+        <div class="math-row">
+            <span class="label">3. AVERAGE IT:</span>
+            <span class="equation">$$ \frac{1}{n} \left[ ( \text{Predicted Y}_1 - \text{Actual Y}_1 )^2 + ( \text{Predicted Y}_2 - \text{Actual Y}_2 )^2 + \dots + ( \text{Predicted Y}_n - \text{Actual Y}_n )^2 \right] $$</span>
+            <div style="margin-left: 160px;">
+             <span>* So basically, add every square difference of each data point and divide it with n. <br> <strong>Average squared error of each point.</strong> <br>n = number of data points.</span>
+            </div>
+        </div>
+    </div>
+    <p>
+        If we translate that into proper Math notation, it looks like this:
+    </p>
+   
+    <div class="math-block" style="border:2px solid #4c7273;width: 200px;">
+    $$ MSE = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2 $$
+    </div>
+    <div class="code-comment" style="margin-top: -10px; margin-bottom: 30px;">
+        <br>n = number of data points<br>
+        ŷ = predicted value<br>
+        y = actual value
+    </div>
+    <h2>3. Gradient Descent</h2>
+        <p>
+            This is basically, running through different values for w and b until the MSE is at the lowest (like my mental health).
+            So, by this, we will have our best line which will best reperesent our data.
+        </p>
+        <p>
+            But, How can we know the next value of w and b? This is where Gradient Descent comes in.
+        </p>
+        <div class="math-block" style="border-left-color: #641159;">
+        w_new = w_old - learning_rate * - gradient <br>
+        b_new = b_old - learning_rate * - gradient
+        </div>
+        Let's understand gradient first. <br>
+        <div class="math-block" style="width:250px;">
+        $$ \text{Gradient of weight} = \frac{\partial L}{\partial w}$$
+        $$ \text{Gradient of bias} = \frac{\partial L}{\partial b}$$
+        </div>
+        This basically tells us how much L(Loss) changes when w or b changes.<br>
+
+        <div class="math-block">
+            1. Gradient for Weight ($w$):$$\frac{\partial L}{\partial w} = -\frac{2}{n} \sum_{i=1}^{n} x_i (y_i - \hat{y}_i)$$ <br>
+            2. Gradient for Bias ($b$):$$\frac{\partial L}{\partial b} = -\frac{2}{n} \sum_{i=1}^{n} (y_i - \hat{y}_i)$$
+        </div>
+        If you want to see the calculations to get the gradients, click below. (However, they're not necessary to understand this)
+    <div class="sbs">
+        <div class="math-block">
+            <div class="formula-toggle">Gradient w.r.t weight:</div>
+            <div class="formula-content">
+                $$L = \frac{1}{n} \sum (y - \hat{y})^2$$
+                $$L = \frac{1}{n} \sum (y - (wx + b))^2$$
+                $$\hat{y} = wx + b$$
+                $$L = \frac{1}{n} \sum u^2 \text{ where } u = (y - \hat{y})$$
+                $$\frac{\partial L}{\partial w} = \frac{1}{n} \sum 2u \frac{\partial u}{\partial w}$$
+                $$\frac{\partial u}{\partial w} = -x$$
+                $$\frac{\partial L}{\partial w} = \frac{2}{n} \sum (y - \hat{y})(-x)$$
+                $$\text{Final: }\boxed{\frac{\partial L}{\partial w} = -\frac{2}{n} \sum x(y - \hat{y})}$$
+            </div>
+        </div>
+        <div class="math-block">
+            <div class="formula-toggle">Gradient w.r.t bias:</div>
+            <div class="formula-content">
+                $$L = \frac{1}{n} \sum (y - \hat{y})^2$$
+                $$L = \frac{1}{n} \sum (y - (wx + b))^2$$
+                $$\hat{y} = wx + b$$
+                $$L = \frac{1}{n} \sum u^2 \text{ where } u = (y - \hat{y})$$
+                $$\frac{\partial L}{\partial b} = \frac{1}{n} \sum 2u \frac{\partial u}{\partial b}$$
+                $$\frac{\partial u}{\partial b} = -1$$
+                $$\frac{\partial L}{\partial n} = \frac{2}{n} \sum (y - \hat{y})$$
+                $$\textbf{Final: } \boxed{\frac{\partial L}{\partial b} = -\frac{2}{n} \sum (y - \hat{y})}$$
+            </div>
+        </div>
+    </div> <br>
+        Imagine you are standing on a foggy mountain <b>(the Loss/Error)</b> and your goal is to reach the valley floor <b>(the Minimum Error).</b> <br>
+        Because of the fog, you can’t see the bottom; you can only feel the slope of the ground under your feet.
+        <h3>The Gradient: </h3>This is the slope. it always points to the rise/incrase in height. 
+        <h3>The Minus Sign:</h3> Since the gradient points up the hill (where the error is worse), you simply turn $180^\circ$ and walk the other way.
+        <h3>The Learning Rate (α):</h3> This is the size of your step.
+             <ol>
+              <li>Step too small? It takes forever to reach the bottom.</li>
+              <li>Step too large? You might overstep the valley and end up on the other side.</li>
+              </ol>
+
+        <p><strong>Our learning rate(α)</strong> is one of the things to modify incase our model isn't working well. 
+       (Will discuss in later posts)</p>
+        <div class="math-block" >
+        $$ w_{\text{new}} = w_{\text{old}} - \alpha * \left( -\frac{2}{n} \sum x (y - \hat{y}) \right) $$
+        $$ b_{\text{new}} = b_{\text{old}} - \alpha * \left( -\frac{2}{n} \sum (y - \hat{y}) \right) $$
+        </div>
+        <br> We keep finding the new values with the previous ones for a number of times (<strong>Iterations or Epochs</strong>) until we reach the lowest MSE, after which, any calculation done will only increase the MSE.
+        So, the last iteration which gives our w and b: our model essentially.
+    <h2>Coding it from Scratch:</h2>
+    Now that the general math is down, converting it to code is the next step. <br>
+    Import the data into the program. For the simplicity, we can generate a dataset.
+    <pre><code>
+        import numpy as np
+        import random
+        X = np.array(range(1, 31))
+        y = np.array([3 * x + 10 + random.uniform(-5, 5) for x in X])
+    </code></pre>
+    Coding Linear Regression from scratch predominantly requires 3 functions:
+    <h3> 1. Loss function: </h3>
+     <pre><code>
+        def compute_loss(X, y, w, b):
+            n = len(X)
+            y_pred = w * X + b
+            loss = (1/n) * np.sum((y - y_pred) ** 2)
+        return loss
+     </code></pre>
+    <h3>2.Gradient Calculation Function:</h3>
+     <pre><code>
+        def compute_gradients(X, y, w, b):
+            n = len(X)
+            y_pred = w * X + b
+            dw = (-2/n) * np.sum(X * (y - y_pred))
+            db = (-2/n) * np.sum(y - y_pred)
+        return dw, db
+     </code></pre>
+    <h3>3. Training loop: </h3>
+    <ul>
+        <li>Initialize w and b</li>
+        <li>
+            Predict y values
+            <ul>
+                <li>Calculate loss</li>
+                <li>Compute gradients</li>
+            </ul>
+        </li>
+        <li>Update w and b</li>
+    </ul>
+    <pre><code>
+        def train_model(X, y, lr=0.001, epochs=2000):
+            w, b = 0.0, 0.0
+            for i in range(epochs):
+                dw, db = compute_gradients(X, y, w, b)
+                w -= lr * dw
+                b -= lr * db
+            return w, b
+
+        # Execute Training
+        final_w, final_b = train_model(X, y)
+
+        # Calculate final MSE
+        final_mse = compute_loss(X, y, final_w, final_b)
+
+        #Final Result Output for comparison:
+        print("--- DATA POINTS ---")
+        print(f"X_values = {X.tolist()}")
+        print(f"y_values = {y.tolist()}")
+
+        print("\n--- SCRATCH MODEL RESULTS ---")
+        print(f"Final w   : {final_w}")
+        print(f"Final b   : {final_b}")
+        print(f"Final MSE : {final_mse}")
+    </code></pre>
+    <h2> Evaluating our model</h2>
+    There're a lot of methods to evaluate a model. For now, Let's test it against the standard scikit-learn model.
+    If both models give similar values for the slope(w) and intercept(b), and make similar predictions, it’s a good sign that our
+    implementation is working correctly.
+    <h3>Using Scikit-Learn</h3>
+    First, we import the required model and fit it to the same dataset. From below, we get the w, b and the loss values.
+    <br> If they are similar to our model values, then we have built a good model by the standard.
+    <pre><code>
+    import numpy as np
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import mean_squared_error
+
+    X_reshaped = X.reshape(-1, 1)  # Converts [1, 2, 3...] to [[1], [2], [3]...]
+
+    model = LinearRegression()
+    model.fit(X_reshaped, y)
+
+    sklearn_w = model.coef_[0]      # This is the weight (slope)
+    sklearn_b = model.intercept_    # This is the bias (intercept)
+
+    y_pred = model.predict(X_reshaped)
+    sklearn_mse = mean_squared_error(y, y_pred)
+
+    print(f"Sklearn w   : {sklearn_w}")
+    print(f"Sklearn b   : {sklearn_b}")
+    print(f"Sklearn MSE : {sklearn_mse}")
+    </code></pre>
+
+    My trained model's predictions with my dataset:
+
+    <div class="math-block">
+        <div class="formula-toggle">my_values</div>
+        <div class="formula-content">
+            --- DATA POINTS ---<br>
+            X_values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]<br>
+            y_values = [15.254283570527157, 17.86897944267892, 18.998444314585324, 24.592291750329466, 21.529331600204493, 28.145798569639098, 26.69310372304577, 32.477532335237804, 38.02946943870903, 37.72881956452786, 38.80167209849368, 42.598608600628985, 44.465378582988684, 52.70158807090953, 57.751461086852856, 58.05407123387017, 64.59833006933121, 67.49644757486193, 63.08322319430452, 67.451158081249, 72.60067148272732, 76.14315797073942, 78.43849919621611, 77.96162390880384, 82.59962549648499, 88.8696247198491, 86.2940175373369, 90.91969459438755, 99.34910529059002, 97.14852292808499]  
+
+            <br><br>--- SCRATCH MODEL RESULTS ---<br>
+            Final w   : 3.1311651743387614<br>
+            Final b   : 6.186644993166872<br>
+            Final MSE : 10.02715667983034<br><br>
+            --- SCIKIT-LEARN RESULTS ---<br>
+            Sklearn w   : 2.9439977044878605<br>
+            Sklearn b   : 9.989520114711347<br>
+            Sklearn MSE : 6.589495376212132<br><br>
+
+            --- COMPARISON ---<br>
+            Difference in w: 0.18716746985090094<br>
+            Difference in MSE: 3.4376613036182073
+        </div>
+    </div>
+
+    
+    <hr style="border: 0; height: 2px; background-color: #aeaeae; margin: 24px 0;">
+    Linear regression is one of the foundational algorithms in machine learning,
+    but there’s still a lot more to explore. Even these topics aren't thorough. Concepts like
+    <strong>hyperparameters</strong>, different <strong>model evaluation metrics</strong>
+    like <strong>R²</strong>, regularization techniques, and feature scaling all play
+    a big role in real-world applications.
+    </p>
+    <h3 style="color:#3d7375 ;">Learning Resources that have Helped Me:</h3>
+    <ol>
+        <li>StatQuest with Josh Starmer: <a href="https://www.youtube.com/watch?v=7ArmBVF2dCs&list=PLDZ4Dh7s7nLQqVDUZtZlb_aBiP6CPwDUw&index=1" target="_blank" style="color: #641159;font-size: 16px;">Linear Regression, Clearly Explained!!!</a></li><br>
+        <li>Geeksforgeeks: <a href="https://www.geeksforgeeks.org/machine-learning/ml-linear-regression/" target="_blank"style="color: #641159;font-size: 16px;">Linear Regression in Machine Learning</a></li><br>
+        <li>MLU-EXPLAIN (A Literal Goldmine for Visual Learners: Check out the gradient descent viz especially): <a href="https://mlu-explain.github.io/linear-regression/" target="_blank" style="color: #641159; font-size: 16px;" > Linear Regression </a></li>
+    </ol>
+    <p>
+    I will continue updating this post as I learn more about them, as either sub posts or by editing this one. <br>
+    (PS:Currently, I am trying to understand gradient descent enough to code it in d3.js)
+    </p>
+    <p style="font-size: 18px;">
+        Thank you for reading. <br>
+        <strong>- EXIT -</strong>
+    </p>
+
+    <script>
+
+        document.querySelectorAll('.formula-toggle').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.nextElementSibling.classList.toggle('open');
+            });
+        });
+
+        // D3 visualization
+        const data = [
+            {x: 0.0, y: 1.4967141530112327},
+            {x: 1.1111111111111112, y: 3.0839579210510375},
+            {x: 2.2222222222222223, y: 6.092132982545137},
+            {x: 3.3333333333333335, y: 9.189696523074693},
+            {x: 4.444444444444445, y: 9.654735514165553},
+            {x: 5.555555555555555, y: 11.87697415416193},
+            {x: 6.666666666666667, y: 15.912546148840725},
+            {x: 7.777777777777779, y: 17.322990284708467},
+            {x: 8.88888888888889, y: 18.308303391842827},
+            {x: 10.0, y: 21.542560043585965}
+        ];
+       
+        const margin = {top: 20, right: 20, bottom: 30, left: 40};
+        const width = 600 - margin.left - margin.right;
+        const height = 400 - margin.top - margin.bottom;
+       
+        const svg = d3.select("svg")
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+       
+        const xScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.x) * 1.1])
+            .range([0, width]);
+       
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => d.y) * 1.1])
+            .range([height, 0]);
+       
+        svg.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(xScale));
+       
+        svg.append("g")
+            .call(d3.axisLeft(yScale));
+       
+        svg.selectAll(".data-point")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "data-point")
+            .attr("cx", d => xScale(d.x))
+            .attr("cy", d => yScale(d.y))
+            .attr("r", 5);
+       
+        const fitLine = svg.append("line")
+            .attr("class", "fit-line");
+       
+        const residuals = svg.selectAll(".residual")
+            .data(data)
+            .enter()
+            .append("line")
+            .attr("class", "residual");
+       
+        const slopeSlider = document.getElementById("slope");
+        const interceptSlider = document.getElementById("intercept");
+        const slopeValue = document.getElementById("slope-value");
+        const interceptValue = document.getElementById("intercept-value");
+        const wText = document.getElementById("w-text");
+        const bText = document.getElementById("b-text");
+        const mseValue = document.getElementById("mse-value");
+       
+        function update() {
+            const w = parseFloat(slopeSlider.value);
+            const b = parseFloat(interceptSlider.value);
+           
+            slopeValue.textContent = w.toFixed(2);
+            interceptValue.textContent = b.toFixed(2);
+            wText.textContent = w.toFixed(2);
+            bText.textContent = b.toFixed(2);
+           
+            fitLine
+                .attr("x1", xScale(0))
+                .attr("y1", yScale(b))
+                .attr("x2", xScale(d3.max(data, d => d.x)))
+                .attr("y2", yScale(w * d3.max(data, d => d.x) + b));
+           
+            residuals
+                .attr("x1", d => xScale(d.x))
+                .attr("y1", d => yScale(d.y))
+                .attr("x2", d => xScale(d.x))
+                .attr("y2", d => yScale(w * d.x + b));
+           
+            const mse = data.reduce((sum, d) => sum + Math.pow(d.y - (w * d.x + b), 2), 0) / data.length;
+            mseValue.textContent = mse.toFixed(4);
+        }
+       
+        update();
+       
+        slopeSlider.addEventListener("input", update);
+        interceptSlider.addEventListener("input", update);
+    </script>
+</body>
+</html>

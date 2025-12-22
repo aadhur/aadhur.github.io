@@ -1,0 +1,81 @@
+    body {
+        max-width: 1300px;
+        margin: 50px auto;
+        padding: 20px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        line-height: 1.6;
+        background-color: #0a0a0a;
+        color: #e0e0e0;
+    }
+    .back-link {
+        color: #888;
+        text-decoration: none;
+        font-size: 15px;
+        padding-bottom: 2px;
+        transition: all 0.3s ease;
+    }
+    .back-link:hover { color: #641159; }
+    .math-block .divider { border-bottom: 1px solid #333; margin: 15px 0; }
+    h2 { font-size: 24px; color: #e0e0e0; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 50px; margin-bottom: 20px; }
+    h3 { font-size: 20px; color: #3d7375; margin-top: 30px; }
+    .meta { color: #6b6b6b; font-size: 14px; margin-bottom: 40px; }
+    svg { border: 1px solid #333; background-color: #111; border-radius: 8px; width: 100%; height: auto; }
+    .data-point { fill: #3d7375; }
+    .fit-line { stroke: #641159; stroke-width: 2; }
+    .residual { stroke: darkred; stroke-dasharray: 3,3; }
+    .math-block {
+        background: rgba(255, 255, 255, 0.03);
+        border-left: 3px solid #4c7273;
+        padding: 20px;
+        margin: 10px 0;
+        font-family: 'Courier New', monospace;
+    }
+    .math-row { display: block; align-items: center; margin-bottom: 10px; }
+    .label { color: #6b6b6b; width: 150px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
+    pre {
+        background: #151515;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        border: 1px solid #333;
+    }
+    code { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 14px; color: #a9b7c6; }
+    .highlight { background-color: #2d4040; color: #fff; padding: 2px 5px; border-radius: 3px; }
+    input[type="range"] { width: 100%; margin: 10px 0; background: #333; height: 5px; border-radius: 3px; outline: none; -webkit-appearance: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #641159; border-radius: 50%; cursor: pointer; }
+    .interactive-container {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        background: #151515;
+        padding: 25px;
+        border-radius: 12px;
+        margin: 20px 0;
+        border: 1px solid #222;
+    }
+    .controls-pane { flex: 1; min-width: 250px; }
+    .viz-pane { flex: 1.5; }
+    .stat-box { margin-top: 20px; padding-top: 15px; border-top: 1px solid #333; }
+    .mse-highlight { font-size: 1.2em; color: darkred; font-weight: bold; }
+    .formula-toggle {
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        color: white;
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s ease;
+    }
+    .formula-toggle:hover { color: #3d7375; }
+    .formula-toggle::before { content: '$ cat '; }
+    .formula-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        font-size: 13px;
+        line-height: 1.6;
+        margin-top: 10px;
+        padding: 0 8px;
+        text-align: left;
+    }
+    .formula-content.open { max-height: 500px; }
+    .sbs { display: flex; gap: 40px; align-items: flex-start; }
