@@ -54,7 +54,7 @@
     <h2>1. The Concept</h2>
     <p>
         Regression in Machine Learning is a method to predict <span class="highlight">continuous values</span> of a target variable.
-        In simple terms: predicting the price of a house based on its size by its previous data of house prices and sizes.
+        In simple terms: predicting the price of a house based on its size using its previous data of house prices and sizes.
         We do this by finding a pattern in the data.
     </p>
    
@@ -98,7 +98,7 @@
         Now, we have a rough line of equation. How good can our line predict Y for a new data point X? <br>Where does it predict it wrong? How wrong?
         <br><br>There is sometimes a gap between the line and the actual dot. This is the<span class="highlight"><strong>Error</strong> or <strong>Residual</strong></span>. 
         (You can see the red line in the above graph).
-        We use this to grade our line. <br><br>Like how grades have different forms: marks, percentages, gpas. <br>We have different ways to calculate this loss. These are called Lost/Cost functions.
+        We use this to grade our line. <br><br>Like how grades have different forms: marks, percentages, gpas. <br>We have different ways to calculate this loss. These are called Loss/Cost functions.
     </p>
     <p>But for now, let's focus on one of them: MSE(Mean Squared Error)</p>
    
@@ -119,7 +119,7 @@
             <span class="label">3. AVERAGE IT:</span>
             <span class="equation">$$ \frac{1}{n} \left[ ( \text{Predicted Y}_1 - \text{Actual Y}_1 )^2 + ( \text{Predicted Y}_2 - \text{Actual Y}_2 )^2 + \dots + ( \text{Predicted Y}_n - \text{Actual Y}_n )^2 \right] $$</span>
             <div style="margin-left: 160px;">
-             <span>* So basically, add every square difference of each data point and divide it with n. <br> <strong>Average squared error of each point.</strong> <br>n = number of data points.</span>
+             <span>* So basically, add every square difference of each data point and divide it by n. <br> <strong>Average squared error of each point.</strong> <br>n = number of data points.</span>
             </div>
         </div>
     </div>
@@ -137,8 +137,8 @@
     </div>
     <h2>3. Gradient Descent</h2>
         <p>
-            This is basically, running through different values for w and b until the MSE is at the lowest (like my mental health).
-            So, by this, we will have our best line which will best reperesent our data.
+            This is basically, running through different values for w and b until the MSE is at the lowest.
+            So, by this, we will have our best line which will best represent our data.
         </p>
         <p>
             But, How can we know the next value of w and b? This is where Gradient Descent comes in.
@@ -182,22 +182,22 @@
                 $$L = \frac{1}{n} \sum u^2 \text{ where } u = (y - \hat{y})$$
                 $$\frac{\partial L}{\partial b} = \frac{1}{n} \sum 2u \frac{\partial u}{\partial b}$$
                 $$\frac{\partial u}{\partial b} = -1$$
-                $$\frac{\partial L}{\partial n} = \frac{2}{n} \sum (y - \hat{y})$$
+                $$\frac{\partial L}{\partial b} = \frac{2}{n} \sum (y - \hat{y})$$
                 $$\textbf{Final: } \boxed{\frac{\partial L}{\partial b} = -\frac{2}{n} \sum (y - \hat{y})}$$
             </div>
         </div>
     </div> <br>
-        Imagine you are standing on a foggy mountain <b>(the Loss/Error)</b> and your goal is to reach the valley floor <b>(the Minimum Error).</b> <br>
-        Because of the fog, you can’t see the bottom; you can only feel the slope of the ground under your feet.
-        <h3>The Gradient: </h3>This is the slope. it always points to the rise/incrase in height. 
+        Imagine you are standing on a foggy mountain <b>(the Loss/Error)</b> and your goal is to get down <b>(the Minimum Error).</b> <br>
+        Because of the fog, you can’t see the bottom. You can only feel the slope of the ground under your feet.
+        <h3>The Gradient: </h3>This is the slope. It always points to the rise/increase in height. 
         <h3>The Minus Sign:</h3> Since the gradient points up the hill (where the error is worse), you simply turn $180^\circ$ and walk the other way.
         <h3>The Learning Rate (α):</h3> This is the size of your step.
              <ol>
               <li>Step too small? It takes forever to reach the bottom.</li>
-              <li>Step too large? You might overstep the valley and end up on the other side.</li>
+              <li>Step too large? You might overstep and end up on the other side.</li>
               </ol>
 
-        <p><strong>Our learning rate(α)</strong> is one of the things to modify incase our model isn't working well. 
+        <p><strong>Our learning rate(α)</strong> is one of the things to modify in case our model isn't working well. 
        (Will discuss in later posts)</p>
         <div class="math-block" >
         $$ w_{\text{new}} = w_{\text{old}} - \alpha * \left( -\frac{2}{n} \sum x (y - \hat{y}) \right) $$
