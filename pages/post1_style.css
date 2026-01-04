@@ -79,3 +79,4 @@
     }
     .formula-content.open { max-height: 500px; }
     .sbs { display: flex; gap: 40px; align-items: flex-start; }
+    .bat {padding: 12px;border: 1px solid #ddd;}
