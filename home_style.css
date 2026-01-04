@@ -6,6 +6,8 @@
         --link-color: #641159;
         --link-hover: #3d7375;
         --grid-color: rgba(255, 255, 255, 0.036);
+        --tree-color: #444;
+
     }
 
     body {
@@ -84,6 +86,53 @@
         color:var(--intro-color);
     }
 
+
+     .subposts {
+        margin-top: 12px;
+        margin-left: 8px;
+    }
+
+    .subpost {
+        margin-bottom: 10px;
+        margin-left: 20px;
+        position: relative;
+    }
+
+    .subpost::before {
+        content: '├── ';
+        position: absolute;
+        left: -20px;
+        color: var(--tree-color);
+        font-size: 16px;
+    }
+
+    .subpost:last-child::before {
+        margin-top: 5px;
+        content: '└── ';
+    }
+
+    .subpost a {
+        margin-left: 10px;
+        font-size: 16px;
+        color: var(--link-hover);
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .subpost a:hover {
+        color: var(--link-color);
+    }
+
+    .subpost .description {
+        font-size: 14px;
+    }
+
+    .subpost .post-date {
+        font-size: 0.75rem;
+        margin-left: 0;
+        margin-top: 3px;
+    }
+
     .binary-corner{
         position: fixed;
         writing-mode: vertical-rl;
@@ -95,6 +144,7 @@
         top: 0;
         left: 0;
         height: 80vh;
+        user-select: none;
     }
 
     .base64-corner {
@@ -127,7 +177,6 @@
         font-size: 14px;
         color:darkred;
         cursor: pointer;
-        user-select: none;
         transition: color 0.2s ease;
     }
 

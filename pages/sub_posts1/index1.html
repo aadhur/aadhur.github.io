@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>./Linear Regression/Evaluation Metrics</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="../post1_style.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError : false
+        });">
+    </script>
+    <!-- For RMSE alignment -->
+    <style>
+        .katex svg {
+            display: block !important;
+            background: transparent !important;
+            width: auto !important; 
+        } 
+        .katex * {
+            border-style: none !important;
+        }
+
+        .katex .frac-line{
+            border-bottom-style: solid !important; 
+        }
+        svg { border: 2px solid #333; background-color: #000000; border-radius: 8px; width: 60%; display: block; margin: 0 auto;}
+   </style>
+</head>
+<body>
+    <a href="/" class="back-link">[ < ] Homepage</a>
+    <h1 style="font-family:'JetBrains Mono', monospace;">The Reality Check: How bad is my model?</h1>
+    <p>
+        <span style="font-weight: bold;text-decoration:underline;font-size: large;color:#641159;"> NOTE: </span> 
+        <br> The concept of Error Metrics and Fit Metrics are generally applicable to all types of ML models, but the formulas and interpretations may vary for different types of models (like classification, regression, etc.). Here, we will focus on regression models. 
+        <br> This is not particularly limited to Linear Regression.
+    </p>
+
+    <h2>1. The Error Metrics - The Lower the Better</h2>
+    <p>
+        As mentioned before, there are several metrics for error calculations and each are optimised for different data and predictions.
+        <br>It is advised to use atleast two of them to evaluate your model.
+    </p>
+    <span style="font-weight: bold;text-decoration: underline;"> NOTE: </span>
+    In the below formulas,
+    <ol>
+        <li><span class="highlight"> n </span> is the number of datapoints, </li>
+        <li><span class="highlight"> y </span> is the actual value, </li>
+        <li><span class="highlight"> ȳ </span> is the mean value,</li>
+        <li><span class="highlight"> ŷ </span> is the predicted value</li>
+        <li><span class="highlight"> L₁ and L₂ </span> are types of losses (for MAE and MSE calculations respectively).</li>
+    </ol>
+
+    <h3>MSE (Mean Squared Error):</h3>
+    <div class="math-block" style="border-left-color: #641159;">
+     $$ L_2 = RSS = \sum(\text{Predicted Y}- \text{Actual Y})^2 $$
+     $$ MSE = \frac{1}{n}L_2 = \frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2 $$
+    </div>
+    <p>
+        MSE amplifies the bigger errors and diminishes the already smaller ones since they're squared. 
+        That's why, a low MSE value doesn't always mean a better model.
+        <br><br> <span style="font-weight: bold;"> For example: </span>
+        <br> A difference of <span class="highlight">  10 </span> between predicted and actual -> becomes <span class="highlight"> 100 </span> <br>
+        A difference of <span class="highlight"> 0.2 </span> between predicted and actual -> becomes <span class="highlight"> 0.04 </span> <br>
+        This means that MSE is more sensitive to outliers. <br>        
+        <br>
+        If you don't want to take outliers (data that doesn't correlate with the rest of the data) into account, skip MSE.
+    </p>
+    <pre><code>
+        from sklearn.metrics import mean_squared_error
+
+        true_values = [X,Y,Z]
+        predicted_values = [X_p,Y_p,Z_p]
+
+        mse = mean_squared_error(true_values, predicted_values)
+    </code></pre>
+
+    <h3>MAE (Mean Absolute Error)</h3>
+    <div class="math-block" style="border-left-color: #641159;">
+        $$ L_1 = \sum|\text{Predicted Y}- \text{Actual Y}| $$
+        $$ MAE = \frac{1}{n}L_1 =\frac{1}{n}\sum_{i=1}^{n}|\hat{y}_i- y_i| $$
+    </div>
+    <p>
+        We take the absolute value of the difference since we don't want errors to cancel each other out and in the end, not contribute to the metric.
+        <br><span style="font-weight: bold;"> For example: </span>
+        A datapoint's error of +10 won't cancel out another datapoint's error of -10 (since they both are taken as abs(10) -> 10 )
+        <br><br>MAE is more robust (less sensitive) to outliers since it doesn't square the errors. But then, it doesn't penalise large errors and shows no direction of the error (positive or negative).
+        Moreover, it's not differentiable at x=0 (like MSE) which makes it difficult to use in gradient descent calculations.
+        <br><br>MAE is more human-interpretable as its units are the same as the target variable. When introducing the model, you can say "On average, our model is off by {MAE} units"
+    </p>
+    <pre><code>
+        from sklearn.metrics import mean_absolute_error
+
+        true_values = [X,Y,Z]
+        predicted_values = [X_p,Y_p,Z_p]
+
+        mae = mean_absolute_error(true_values, predicted_values)
+    </code></pre>
+
+    <h3>RMSE (Root Mean Squared Error)</h3>
+    <div class="math-block" style="border-left-color: #641159;">
+        $$RMSE = \sqrt{\text{MSE}} = \sqrt{\frac{1}{n} \sum_{i=1}^{n} (\hat{y}_i - y_i)^2}$$    
+    </div>
+    <p>
+        This is similar to MAE in terms of interpretation. However, RMSE gives a relatively higher weight to large errors since the errors are squared before averaging.
+        <br><br>RMSE also gives the standard deviation of the prediction errors (residuals). This means it tells you how spread out the errors are and is more skewed by larger errors.
+    </p>
+    <pre><code>
+        from sklearn.metrics import mean_squared_error
+        import numpy as np #for square root
+
+        true_values = [X,Y,Z]
+        predicted_values = [X_p,Y_p,Z_p]
+
+        rmse = np.sqrt(mean_squared_error(true_values, predicted_values)) #Just square root of MSE
+        rmse = mean_squared_error(true_values, predicted_values, squared=False) #with numpy
+    </code></pre>
+
+    <h3> Some other Error Metrics: </h3>
+    <ol>
+        <li> <span style="font-weight: bold;color: #641159;font-size: 18px;">Mean Absolute Percentage Error (MAPE)</span><br>
+            Percentage error between actual and predicted values
+            <div class="math-block">
+                $$MAPE = \frac{1}{n}\sum_{i=1}^{n}\frac{|\hat{y}_i- y_i|}{y_i}\times100$$
+            </div>
+            No units: Scale Independent <br>
+            Interpretable: "Our Model is off by {MAPE} %"
+        </li><br>
+        <li> <span style="font-weight: bold;color: #641159;font-size: 18px;">Mean Squared Logarithmic Error (MSLE) or Root Mean Squared logarithmic Error(RMSLE): </span><br>
+            Both are by the same concept: Log of MSE and Log of RMSE respectively <br>
+            Taking their log values slows down larger errors -> but smaller errors are same with MSE/MSLE (or RMSE/RMSLE). 
+            <br>So in a  way, it penalises smaller errors and used in situations where you want to target smaller errors but not change/care about larger errors.
+        </li> <br>
+        <li> <span style="font-weight: bold;color: #641159;font-size: 18px;">Huber Loss: </span></li>
+            It is a blend of <span class="highlight"> MSE and MAE</span>. It has a threshold(THV) value which it depends on whether to act as MSE or MAE.
+            <br> Smaller Errors (|error|<THV) -> acts as MSE (squared loss), making it learn fine details. 
+            <br> Larger Errors (|error|>THV) -> acts as MAE (absolute loss), less sensitive to outliers, no squared penalization.
+    </ol>
+
+    <h2>2. The Fit Metrics: The Higher the Better</h2>
+
+        <h3>R² (R-squared): </h3>
+        It's a statistic that measures how well the model explains the variance in the target variable - indication of goodness of fit
+        <div class="math-block" style="border-left-color: #641159;">
+            $$\text{Proportion of data explained by my model to the total data} = 1 - \text{Proportion of data NOT explained by my model to the total data}$$
+            $$R^2 = 1-{\frac{\text{SSE}}{\text{SST}}}$$
+            Let's simplify it and see:
+            $$R^2 = {\frac{\text{SST-SSE}}{\text{SST}}} = {\frac{\text{SSR}}{\text{SST}}}$$
+        </div>
+        <p>
+            But what are these metrics?? What is SSE, SST or SSR? <br><br>
+            <span style="text-decoration: underline;">SST (Total Sum of Squares)</span>: Distance from each point to the mean line ---> <span class="highlight"style="border: 1px solid #641159">Measures total variation in the data</span> 
+            <br><br><span style="text-decoration: underline;">SSE (Error Sum of Squares)</span>: Distance from each point to regression line ---> <span class="highlight"style="border: 1px solid #641159"> Measures unexplained variation (errors/residuals)</span>
+            <br><br><span style="text-decoration: underline;">SSR (Regression Sum of Squares)</span>: Distance from regression line to mean ---> <span class="highlight"style="border: 1px solid #641159"> Measures variation explained by the model </span>
+            <br><br>
+            One thing to note, these values are squared and added for each point so the formuals:
+            <p class="math-block">
+                $$SST = \sum (y_i - \bar{y})^2 ---> \text{(actual - mean)}^2$$
+                $$SSE = \sum (y_i - \hat{y}_i)^2 ---> \text{(actual - regression)}^2$$
+                $$SSR = \sum (\hat{y}_i - \bar{y})^2 ---> \text{(regression - mean)}^2$$
+            </p>
+        </p>
+            The graph helps us understand what these metrics are by calculating them for a single point (Orange Point). <br> From this, we can understand R Squared simply say if our line is better at predicting Y than an average line and by how much. 
+    <script>
+        const data = [
+            {"x": 1.0, "y": 3.0}, {"x": 1.2, "y": 2.5}, {"x": 1.4, "y": 2.5}, {"x": 1.6, "y": 2.5},
+            {"x": 1.5, "y": 3.2}, {"x": 1.7, "y": 3.5}, {"x": 1.8, "y": 3.0}, {"x": 1.9, "y": 3.0},
+            {"x": 2.0, "y": 4.0}, {"x": 2.1, "y": 3.5}, {"x": 2.2, "y": 4.0}, {"x": 2.3, "y": 3.5},
+            {"x": 2.2, "y": 4.5}, {"x": 2.4, "y": 4.5}, {"x": 2.5, "y": 4.0}, {"x": 2.6, "y": 4.0},
+            {"x": 2.6, "y": 5.0}, {"x": 2.8, "y": 5.5}, {"x": 3.0, "y": 5.0}, {"x": 3.1, "y": 6.0},
+            {"x": 3.0, "y": 8.5}, {"x": 3.2, "y": 9.0}, {"x": 3.2, "y": 10.0}, {"x": 3.4, "y": 9.5},
+            {"x": 3.5, "y": 11.0}, {"x": 3.5, "y": 12.0}, {"x": 3.6, "y": 11.5}, {"x": 3.8, "y": 11.0}, {"x": 4.0, "y": 12.5}, 
+            {"x": 4.5, "y": 14.5}, {"x": 4.6, "y": 13.5}, {"x": 4.8, "y": 14.0},
+            {"x": 5.0, "y": 14.0}, {"x": 5.0, "y": 15.5}, {"x": 5.2, "y": 15.0}, {"x": 5.5, "y": 14.5}
+        ];
+        
+        const margin = {top: 30, right: 10, bottom: 0, left: 50};
+        const width = 700 - margin.left - margin.right;
+        const height = 450 - margin.top - margin.bottom;
+
+        const x = d3.scaleLinear()
+            .domain([0, 6])
+            .range([0, width]);
+        
+        const y = d3.scaleLinear()
+            .domain([0, 20])
+            .range([height, 0]);
+        
+        const xAxis = d3.axisBottom(x);
+        const yAxis = d3.axisLeft(y);
+
+        const svg = d3.select("body").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+
+        svg.append("g")
+            .call(yAxis);
+
+        const meanY = d3.mean(data, d => d.y);
+        const slope = 3.535;
+        const intercept = -3.011;
+        const predictY = (valX) => slope * valX + intercept;
+
+        svg.append('line')
+            .attr('x1', x(0))
+            .attr('x2', x(6))
+            .attr('y1', y(meanY))
+            .attr('y2', y(meanY))
+            .attr('stroke', '#81142C')
+            .attr('stroke-width', 2)
+            .attr('stroke-dasharray', '5,5')
+            .attr('opacity', 0.7);
+
+        svg.append('text')
+            .attr('x', x(5.7))
+            .attr('y', y(meanY) - 8)
+            .text('Mean (ȳ)')
+            .style('fill', '#81142C')
+            .style('font-size', '12px')
+            .style('font-weight', 'bold');
+
+        svg.append('line')
+            .attr('x1', x(1))
+            .attr('x2', x(5.5))
+            .attr('y1', y(predictY(1)))
+            .attr('y2', y(predictY(5.5)))
+            .attr('stroke', '#B0D19A')
+            .attr('stroke-width', 3);
+
+        svg.append('text')
+            .attr('x', x(5.6))
+            .attr('y', y(predictY(5.2)) - 10)
+            .text('Regression Line')
+            .style('fill', '#B0D19A')
+            .style('font-size', '12px')
+
+        svg.selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => x(d.x))
+            .attr("cy", d => y(d.y))
+            .attr("r", 4)
+            .attr("fill", "#A0AFB5")
+            .attr("opacity", 0.6);
+
+        const focusPoint = data.find(d => d.x === 4.0 && d.y === 12.5);
+        const xPos = x(focusPoint.x);
+        const yPoint = y(focusPoint.y);
+        const yReg = y(predictY(focusPoint.x));
+        const yMean = y(meanY);
+
+        svg.append("circle")
+            .attr("cx", xPos)
+            .attr("cy", yPoint)
+            .attr("r", 6)
+            .attr("fill", "orange")
+            .attr("stroke", "gray")
+            .attr("stroke-width", 2);
+
+        svg.append("line")
+            .attr("x1", xPos - 8)
+            .attr("x2", xPos - 8)
+            .attr("y1", yPoint)
+            .attr("y2", yMean)
+            .attr("stroke", "purple")
+            .attr("stroke-width", 3);
+
+        svg.append("text")
+            .attr("x", xPos - 40)
+            .attr("y", (yPoint + yMean) / 1.8)
+            .text("SST")
+            .style("fill", "purple")
+            .style("font-size", "13px")
+            .style("font-weight", "bold");
+
+        svg.append("line")
+            .attr("x1", xPos + 8)
+            .attr("x2", xPos + 8)
+            .attr("y1", yPoint)
+            .attr("y2", yReg-5)
+            .attr("stroke", "#A3D9D9")
+            .attr("stroke-width", 3);
+
+        svg.append("text")
+            .attr("x", xPos + 15)
+            .attr("y", (yPoint + yReg) / 2.2)
+            .text("SSE")
+            .style("fill", "#A3D9D9")
+            .style("font-size", "13px")
+            .style("font-weight", "bold");
+
+        svg.append("line")
+            .attr("x1", xPos+3)
+            .attr("x2", xPos+3)
+            .attr("y1", yReg)
+            .attr("y2", yMean)
+            .attr("stroke", "#B69AD2")
+            .attr("stroke-width", 3);
+
+        svg.append("text")
+            .attr("x", xPos + 15)
+            .attr("y", (yReg + yMean) / 2)
+            .text("SSR")
+            .style("fill", "#B69AD2")
+            .style("font-size", "13px")
+            .style("font-weight", "bold");
+    </script>
+
+    <div class="math-block">
+        From this, we can understand the base formula using which R squared is calculated.
+        $$\text{SST} = \text{SSR+SSE}$$
+        And, the proportion of SSR with respect to SST is our R²
+    </div>
+
+    In simple words, if R² = 0.8, it means that 80% of the variance in our Y is explained by our X variable/s.
+    It's basically saying, if we predict the average value for every data point, is that error worse than our model's error and by how much?
+    However, it doesn't measure the model's strength, just how well X explains Y. 
+    <br><br>It ranges from <span class="highlight">0 to 1</span>, where:
+    <ul>
+        <li>0 means the model doesn't explain any variance</li>
+        <li>1 means the model perfectly explains all variance</li>
+    </ul>
+    <p>
+        However, in some cases, it can be negative if SSE > SST where error from the mena line is smaller than the error from our model line. This just means, our model is very bad, worse than the base average model and we need to change it.
+    </p>
+
+    <pre><code>
+        from sklearn.metrics import r2_score
+
+        true_values = [X,Y,Z]
+        predicted_values = [X_p,Y_p,Z_p]
+
+        r2 = r2_score(true_values, predicted_values)
+    </code></pre>
+
+
+    <h3>Adjusted R²: </h3>
+    Adjusted R² is a modified version of R² that takes in the number of predictors (X variables) in the model while calculating the R². It's useful in <span class="highlight">multiple linear regression</span> where we use multiple X variables to predict a single Y variable.
+    <br><br> I will go in depth in later posts.
+
+    <h2>3. The Validation Strategy: How to use these metrics?</h2>
+    <p>
+        Knowing the formulas is only half the battle. If you calculate $R^2$ on the same data the model learned from, you aren't checking "how bad" the model is but instead
+        you're just checking how good its memory is. This is called Overfitting.
+        Our model's performance can only be evaluated with <span class="highlight">new datasets</span>. This is the testing data.
+
+        To evaluate a model, we need to split our data into training and testing sets. The training set is used to train the model, while the testing set is used to evaluate its performance.
+        <br><br> A common split ratio is 80-20 or 70-30, where 80% or 70% of the data is used for training and the rest for testing.
+        <br><br> After training the model on the training set and calculating its metrics, we use it to make predictions on the testing set and calculate the error and fit metrics discussed above.
+       
+        <br><span class="highlight"style="font-weight: bold;">The final grade evaluated using the testing dataset is what that matters.</span> The metrics calculated from training set is used to optimise our model. 
+        <br>If someone asks, "What is the accuracy of this model?" they are asking for the testing evaluation.
+        <br><br> Moreover, like mentioned in the beginning, always use more than one error metric. For example, MAE scores might have been very low on our model which makes it good but MSE would have been high. 
+        This can be interpreted that we have few large outliers which may have been ignored by MAE.
+   </p>
+
+    <h3>3.1 Cross Validation:</h3>
+    <p>
+        However, training on one set and testing on one set alone can sometimes not give the best results. Maybe by luck, it can also overestimate our model's performance. 
+        <br> Hence, there's a method called Cross Validation which is a sampling technique to prevent these issues.
+        <ol>
+            <li>Splitting the dataset into several parts.</li>
+            <li>Training the model on some parts and testing it on the remaining part.</li>
+            <li>Repeating this resampling process multiple times by choosing different parts of the dataset.</li>
+            <li>Averaging the results from each validation step to get the final performance.</li>
+        </ol>
+
+        There are several types of cross validation techniques. One of the more popular ones is K-Fold.
+        <br><br> In K-Fold Validation, our data is split into k parts(folds). It's first trained by k-1 folds and tested by the remaining fold. It's repeated k times until every fold has been tested once.
+        <br> For example, our data is divided into 3 parts: I, II, III. The sampling process consists of 3 iterations.
+        <table style="width:20%; margin: 20px 0; ">
+
+            <tbody>
+                <td class="bat"style="background-color: #3d7375;">I</td>
+                <td class="bat" style="background-color: #3d7375;">II</td>
+                <td class="bat" style="background-color: #35042f;">III</td>
+                <td style="padding: 20px;">
+                <td class="bat" style="background-color: #35042f;">I</td>
+                <td class="bat"style="background-color: #3d7375;">II</td>
+                <td class="bat"style="background-color: #3d7375;">III</td>  
+                </td>  
+                <td style="padding: 20px;"> 
+                <td class="bat"style="background-color: #3d7375;">I</td>               
+                <td class="bat" style="background-color: #35042f;">II</td>
+                <td class="bat"style="background-color: #3d7375;">III</td>
+                </td>
+            </tbody>
+            </table>
+        <ol>
+            <li>Data is trained by I,II and tested by III</li>
+            <li>Data is trained by II,III and tested by I</li>
+            <li>Data is trained by I,III and tested by II</li>
+        </ol>
+    </p>
+
+    <br>Comparison of our train and test metrics can tell us a lot about our model's performance.
+
+    <table style="width:80%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <thead>
+            <tr style="text-align: left;background-color: #35042f;">
+            <th class="bat">Result</th>
+            <th class="bat">Term</th>
+            <th class="bat">Meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+            <td class="bat"><b>Low Train Error / High Test Error</b></td>
+            <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">Overfitting/High Variance</td>
+            <td class="bat">The model "memorized" the training data so failed with new data.</td>
+            </tr>
+            <tr>
+            <td class="bat"><b>High Train Error / High Test Error</b></td>
+            <td style="padding: 12px; border: 1px solid #ddd; color: #e74c3c; font-weight: bold;">Underfitting/High Bias</td>
+            <td class="bat">The model didn't learn anything at all; it's too simple.</td>
+            </tr>
+            <tr>
+            <td class="bat"><b>Low Train Error / Low Test Error</b></td>
+            <td style="padding: 12px; border: 1px solid #ddd; color: #27ae60; font-weight: bold;">Good Fit</td>
+            <td class="bat">What we want is this</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3 style="color:#3d7375 ;">Learning Resources:</h3>
+    <ol>
+        <li>StatQuest with Josh Starmer: <a href="https://www.youtube.com/watch?v=7ArmBVF2dCs&list=PLDZ4Dh7s7nLQqVDUZtZlb_aBiP6CPwDUw&index=1" target="_blank" style="color: #641159;font-size: 16px;">Linear Regression, Clearly Explained!!!</a></li><br>
+        <li>Geeksforgeeks: <a href="https://www.geeksforgeeks.org/machine-learning/regression-metrics/" target="_blank"style="color: #641159;font-size: 16px;">Regression Metrics</a></li><br>
+        <li>Kaggle: <a href="https://www.kaggle.com/code/marcinrutecki/regression-models-evaluation-metrics" target="_blank" style="color: #641159; font-size: 16px;" > Regression Models Evaluation Metrics </a></li><br>
+        <li>Prof. Ryan Ahmed: <a href="https://www.youtube.com/watch?v=jyeNAByFL_A" target="_blank"style="color: #641159;font-size: 16px;">Machine Learning Regression Models Metrics</a></li><br>
+    </ol>
+
+    <p style="font-size: 18px;">
+        Thank you for reading. <br>
+        <strong>- EXIT -</strong>
+    </p>
+
+</body>
+
+</html>
