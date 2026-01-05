@@ -139,7 +139,7 @@
         </li> <br>
         <li> <span style="font-weight: bold;color: #641159;font-size: 18px;">Huber Loss: </span></li>
             It is a blend of <span class="highlight"> MSE and MAE</span>. It has a threshold(THV) value which it depends on whether to act as MSE or MAE.
-            <br> Smaller Errors (|error|<THV) -> acts as MSE (squared loss), making it learn fine details. 
+            <br> Smaller Errors (|error|&lt;THV) -> acts as MSE (squared loss), making it learn fine details. 
             <br> Larger Errors (|error|>THV) -> acts as MAE (absolute loss), less sensitive to outliers, no squared penalization.
     </ol>
 
