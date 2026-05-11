@@ -15,6 +15,12 @@
         transition: all 0.3s ease;
     }
     .back-link:hover { color: #641159; }
+    .simple-divider {
+    border: 0;
+    height: 1px;
+    background: #d1d1d1;
+    margin: 20px 0;
+    }
     .math-block .divider { border-bottom: 1px solid #333; margin: 15px 0; }
     h2 { font-size: 24px; color: #e0e0e0; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 50px; margin-bottom: 20px; }
     h3 { font-size: 20px; color: #3d7375; margin-top: 30px; }
@@ -30,6 +36,14 @@
         margin: 10px 0;
         font-family: 'Courier New', monospace;
     }
+    .writeup-container img {
+        display: block;        /* Necessary for margin auto to work */
+        margin: 30px auto;     /* 35px vertical spacing, horizontal 'auto' centers it */
+        max-width: 90%;        /* Keeps images slightly smaller than the text width for a cleaner look */
+        height: auto;          /* Maintains the aspect ratio */
+        border: 1px solid #333; /* Subtle border to define the screenshot edges */
+        border-radius: 4px;    /* Slightly rounded corners for a modern feel */
+    }
     .math-row { display: block; align-items: center; margin-bottom: 10px; }
     .label { color: #6b6b6b; width: 150px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
     pre {
@@ -38,6 +52,16 @@
         border-radius: 5px;
         overflow-x: auto;
         border: 1px solid #333;
+    }
+    .image-wrapper {
+        text-align: center;
+        width: 100%;
+    }
+    .caption {
+        font-size: 0.85em;
+        color: #888;
+        margin-top: -20px; /* Pulls caption closer to the image */
+        margin-bottom: 30px;
     }
     code { font-family: 'Menlo', 'Monaco', 'Courier New', monospace; font-size: 14px; color: #a9b7c6; }
     .highlight { background-color: #2d4040; color: #fff; padding: 2px 5px; border-radius: 3px; }

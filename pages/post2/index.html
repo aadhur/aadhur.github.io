@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>./Gift</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <a href="/" class="back-link">[ < ] Homepage</a>
+    <h1 style="font-family:'JetBrains Mono', monospace;">Gift | HackMyVM</h1>
+    <div class="math-block" style="border-left-color: #641159;">
+        <p><strong>Description:</strong> A really easy VM. That's a gift! :)</p>
+        <p><strong>Difficulty:</strong> Easy</p>
+        <p><strong>Download:</strong> <a href="https://downloads.hackmyvm.eu/gift.zip" class="back-link" target="_blank">Gift - sml</a></p>
+    </div>
+    <div class="writeup-container">
+        <section>
+            <h2> 1. Target IP Identification </h2>
+            <p> Let's start by identifying the IP address of the target machine within our local network. </p> <br>
+            <span class="math-block">
+                sudo arp-scan --localnet
+            </span> 
+            <br> <br> We will get results similar to this: 
+            <div class="image-wrapper">
+             <img src="sudo-arp.png" alt="Sudo-arp scan">
+             <p class="caption">Figure 1: Identifying the target via ARP scan.</p>
+            </div>
+            The results show our neighbouring network devices. 
+            The first 24 bits of a MAC addresses represent the <strong>Organizationally Unique Identifier (OUI)</strong> which identifies the hardware manufacturer.
+            <br> 
+            <ul>
+                <li><span class="highlight">0a:00:27</span> — Typically a locally administered address (i.e. the virtual host adapter).</li> <br>
+                <li><span class="highlight">08:00:27</span> — The globally assigned OUI for <strong>Oracle VirtualBox</strong>.</li>
+            </ul>
+            This confirms the setup. I have two VMs running - My Kali attacker machine and the target. But which is the target machine?
+            <br>
+            <span class="math-block" style="margin-bottom: 15px; display:flex;">
+                nmap [IP1] [IP2] # MAC addresses with OUI as '08:00'
+            </span> 
+            <div class="image-wrapper">
+              <img src="nmap-scan1.png" alt="nmap-scan"> 
+              <p class="caption">Figure 2: Identifying the target machine via Nmap scan.</p>
+            </div>
+            The scan results show only one of them has open services. That is our target machine.
+        </section>
+        <section>
+            <h2> 2. Nmap enumeration </h2>
+            Now, let's enumerate our target machine for more information on those open services.
+            <span class="math-block" style="margin-bottom: 15px; display:flex;">
+                nmap -sV -sS [IP]
+            </span>
+            <div class="image-wrapper">
+                <img src="1.png" alt="detailed-nmap"> 
+                <p class="caption">Figure 3: Identifying the open services via Nmap scan.</p>
+            </div>
+            The results show two ports open. 
+            <br><strong>sV</strong> - shows the service version its running on (Used for identifying exploits in older software)
+            <br>Let's visit the http port:
+            <div class="image-wrapper">
+                <img src="http.png" alt="Web-interface-msg">
+                <p class="caption">Figure 4: HTTP web-interface </p>
+            </div>
+            <span class="math-block">"Don't Overthink. Really, Its simple."</span>
+            <p>Inspecting the page source also reveals a hidden comment: <code>&lt;!-- Trust me --&gt;</code></p>
+       </section>
+       <section>
+            <h2> 3. Directory Fuzzing & Logic </h2>
+            I used <code>dirb</code> for a quick directory enumeration. The results didn't give anything.
+            <div class="image-wrapper">
+                <img src="2.png" alt="dirb-results"> 
+                <p class="caption">Figure 5: Directory enumeration results</p>
+            </div>
+            Eventually, I thought there was an hidden word from the capitalised letters "DORI" which could be a SSH username or password.
+            However, bruteforcing SSH with it didn't give any results.
+            <br>
+            <p>Then, I used <strong>Hydra</strong> to perform a wordlist attack against the root account.</p>
+       </section>
+       <section>
+        <h2> 4. SSH bruteforce with Hydra </h2>
+            <span class="math-block" style="margin-bottom: 15px; display:flex;">
+                hydra -l root -P /usr/share/wordlists/rockyou.txt [IP] ssh
+            </span>
+            <div class="image-wrapper">
+                <img src="3.png" alt="final"> 
+                <p class="caption">Figure 6: Root password cracked</p>
+            </div>
+            I used <span class="highlight"> rockyou.txt</span> as the wordlist.
+            <br>The password for root is <strong> simple </strong> 
+            <br> As the web suggested, directly and literally, it's simple.
+            <p>
+            By logging in as root via SSH, I gained full access to the machine. Since, we're already root, we can access both the user and root passwords.
+            </p>
+            <div class="image-wrapper">
+                <img src="final.png" alt="final"> 
+                <p class="caption">Figure 7: Logged in as root via SSH</p>
+            </div>
+        </section>
+        <p style="font-size: 18px;">
+            Thank you for reading. <br>
+            <strong>- EXIT -</strong>
+        </p>
+    </div>
+
+</body>
