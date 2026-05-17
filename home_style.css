@@ -24,8 +24,6 @@
             linear-gradient(var(--grid-color) 1px, transparent 1px),
             linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
         background-size: 30px 30px;
-
-        transition: background-color 0.3s, color 0.3s, background-image 0.3s;
     }
 
     h1 {
