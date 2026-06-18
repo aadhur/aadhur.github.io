@@ -105,8 +105,13 @@
         line-height: 1.6;
         margin-top: 10px;
         padding: 0 8px;
-        text-align: left;
     }
-    .formula-content.open { max-height: 500px; }
+    code.tag-concept {
+        border: 1px solid #3d7375 ;
+        padding: 2px 6px;
+        border-radius: 3px;
+        display: inline-block; /* Keeps padding behaving nicely inline */
+    }
+    .formula-content.open { max-height: 1500px; }
     .sbs { display: flex; gap: 40px; align-items: flex-start; }
     .bat {padding: 12px;border: 1px solid #ddd;}

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>./Isolation-Forests</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ]
+        });">
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll('.formula-toggle').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    toggle.nextElementSibling.classList.toggle('open');
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <a href="/" class="back-link">[ < ] Homepage</a> 
+    <br> <br> 
+    <h1 style="font-family:'JetBrains Mono', monospace;">Exploiting the Mathematics | Isolation Forests</h1>
+    
+    <div class="math-block" style="border-left-color: #641159;">
+        <p><strong>Description:</strong> Inside-out Poisoning: Desensitizing Anomaly Detection Models via Unauthenticated Internal Kafka Streams</p>
+        <p><strong>Concepts:</strong> <code class="tag-concept">adversarial-ml</code> <code class="tag-concept">data-poisoning</code> <code class="tag-concept">kafka</code> <code class="tag-concept">isolation-forest</code></p>
+    </div>
+
+    <div class="writeup-container">
+        <section>
+            <h2>1. Introduction</h2>
+            <p>
+            In recent years, Machine Learning has become fundamental to the automation of cybersecurity frameworks, with modelling serving as the essential backbone of AI automation. We have transitioned from archaic rule-based detection to the development of Anomaly Detection Models powered by traditional ML and deep learning. As threat actors increasingly leverage AI to enhance their adaptability, it is vital for security infrastructures to evolve into adaptable defense mechanisms, leading to the rise of model-based anomaly detection.
+            </p>
+            <p>
+            The efficacy of any model is linked to the quality of its training data; consequently, any manipulation of this data inevitably compromises the model's integrity. This vulnerability is further reinforced by the current shift toward adaptive models that learn from real-time user data. This trend introduces a significant security flaw by granting users influence over the very data the model utilizes for training. This specific loophole facilitates the process of desensitization.
+            </p>
+            <p>
+            Data Poisoning is a subset of Adversarial Machine Learning. There's a specific type of data poisoning that's at play here: <strong>Boiling Frog Attack</strong> which is when it runs under the assumption that the anomaly detection model undergoes Unsupervised Streaming, Incremental Learning or Automated Periodic Retraining. The common ground for all this? Any raw input data becomes training data. By slowly polluting this stream, the attacker rewires the security system's baseline from the inside out. 
+            <br><br><strong>The core concept of this exploit pipeline is manipulating the logs to rewire a security system's response to suspicious activity.</strong>
+            </p>
+            <p>
+            Let's go through each step that makes this exploit possible and further, prevention strategies to thus, adapt.
+            </p>
+        </section>
+
+        <section>
+            <h2>2. Architectural Discovery - Finding the Open Pipe</h2>
+            <p>
+            Let's assume an internal pentester, under the contract, has gained a low-level foothold on a corporate workstation. To feed an active anomaly model, enterprise networks employ high-throughput, distributed event-streaming platforms like Apache Kafka to act as a central data highway. Localized collection daemons (e.g. Winlogbeat, Filebeat, or Splunk forwarders) watch host events and ship raw records to the Kafka cluster. The cluster buffers and sorts these logs into specific Topics (such as win-auth-logs), which the central machine learning engine continuously subscribes to for live scoring and data lake ingestion.
+            </p>
+            <div class="image-wrapper">
+                <img src="kafka-structure.png" alt="Insecure Log Architecture Topology" style="background-color:#6cb3b5;padding:30px;max-width: 50%; height: auto;">
+                <div class="caption">Figure 1: High-level visual mapping of the open log pipeline pipeline infrastructure.</div>
+            </div>
+            <p>
+            The structural flaw manifests when developers treat the internal network as an implicit trust zone, failing to enforce Access Control Lists (ACLs) or authentication on the Kafka brokers. By auditing localized agent configuration files on the compromised workstation, an attacker can map the log-shipping topology. This is done by inspecting the primary configuration file, generally located at <span class="highlight">C:\Program Files\Filebeat\filebeat.yml</span> which reveals exactly how host telemetry is formatted and where it is sent.
+            </p>
+
+            <h3>2.1 Pipeline Configurations</h3>
+            <p>Reviewing standard setup parameters displays the stark divergence between a locked-down operational deployment and an environments configuration file layout exposing an unauthenticated ingestion zone.</p>
+
+           <div style="display: flex; width: 100%; box-sizing: border-box;">
+                <div style="width: 50%; box-sizing: border-box; padding-right: 10px;">
+                    <pre style="margin: 10;"><code style="display: block; background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 4px; overflow-x: auto;"><strong># NON-VULNERABLE CONFIGURATION </strong><br>
+filebeat.inputs:
+- type: filestream
+id: win-security-logs
+paths:
+    - C:\Windows\System32\Winevt\Logs\Security.evtx
+output.kafka:
+hosts: ["kafka-secure.bank.internal:9093"]
+topic: "anomaly-model"
+<div style="color: #3d7375">
+# THE AUTHENTICATION LOCK </div>
+username: "workstation_log_shipper"
+password: "${local.KAFKA_MODEL_PIPELINE_PASS}"
+sasl.mechanism: "SCRAM-SHA-512"
+
+ssl.enabled: true
+ssl.verification_mode: "full"
+ssl.certificate_authorities:["C:\Program Files\Filebeat\certs\<br>bank-root-ca.pem"]</span></code></pre>
+                </div>
+                <div style="width: 50%; box-sizing: border-box; padding-left: 10px;">
+                    <pre style="margin: 10;"><code style="display: block; background-color: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 4px; overflow-x: auto; white-space: pre; text-align: left;"><strong># VULNERABLE CONFIGURATION </strong><br>
+filebeat.inputs:
+- type: filestream
+id: win-security-logs
+paths:
+    - C:\Windows\System32\Winevt\Logs\Security.evtx
+    - C:\Apps\AuthenticationProvider\logs\login_attempts.log
+
+output.kafka:
+hosts: ["192.168.10.25:9092"]
+topic: "anomaly-model"
+
+    <div style="color: #3d7375" ># Missing authentication, authorization, and TLS encryption</div>
+                    </code></pre>
+                </div>
+            </div>
+
+            <p>This vulnerable design of the log-to-apache kafka pipeline is the gateway for us to inject synthetic logs that can manipulate the anomaly model.</p>
+        </section>
+
+        <section>
+            <h2>3. Exploiting the Isolation Forest Model</h2>
+            <p>
+            Isolation Forests are frequently utilized as the core algorithm for anomaly detection. They are an unsupervised group of random decision trees that split data points based on feature dimensions. For an easier explanation on how they are exploited, we will use a far simpler Isolation Forest comprising only three decision trees.
+            </p>
+
+            <div class="image-wrapper">
+                <img src="isolation-forest-tree.png" alt="Isolation Forest Decision Tree Logic Map"                 style="background-color:#95698e;padding:30px;max-width: 50%; height: auto;">
+                <div class="caption">Figure 2: Statistical partitioning thresholds across sample trees inside the forest logic map.</div>
+            </div>
+
+            <p>
+            The red circles represent anomaly cases and will thus be flagged if the model detects them within the logs or its input data. Because anomalies are statistically rare and structurally distinct, they isolate rapidly during random partitioning. This can be observed in the minimal Path Length [PL] $(h(x))$ , terminating immediately near the root node while normal data points require deep, highly branched paths to be isolated.
+            </p>
+            <p>The anomaly score $s(x,n)$ for an operational sample $x$ within a dataset size of $n$ is derived using the following core formula:</p>
+
+            <div class="math-block" style="border-left-color:#641159;">
+                <div class="math-row">
+                    <span class="label">Formula:</span>
+                    $$ s(x,n)=2^{\left(-\frac{E(h(x))}{c(n)}\right)} $$
+                    <br>
+                    $h(x)$: Path length (number of splits) of the data point $x$ <br> <br>
+
+                    $E(h(x))$: Average path length across all trees in the forest <br> <br>
+
+                    $c(n)$: Average path length of unsuccessful searches in a binary search tree of size $n$ <br>
+                </div>
+            </div>
+            <p><strong>Interpretation:</strong> Scores closer to 1 indicate anomalies, while scores below 0.5 indicate normal points.</p>
+            <p>An attacker can exploit this mathematical dependency by deploying a lightweight Python script leveraging the <span class="highlight">kafka-python</span> library.</p>
+
+            
+
+            <pre><code><strong># Exploit Script</strong><br>
+from kafka import KafkaProducer
+import json
+import random
+
+producer = KafkaProducer(
+    bootstrap_servers=['192.168.10.25:9092'],
+    value_serializer=lambda v: json.dumps(v).encode('utf-8')
+)
+
+ <div style="color: #3d7375" ># Injecting continuous, synthetic "gray noise" to distort feature boundaries </div>
+for i in range(10000):
+    fake_log = {
+        "failed_logins": random.randint(1, 3),
+        "active_sessions": random.randint(1, 2),
+        "network_volume_mb": random.uniform(0.5, 2.0)
+    }
+producer.send('anomaly-model', value=fake_log)
+            </code></pre>
+
+            <p>
+            By streaming thousands of low-volume, synthetic events directly into the open Kafka topic, it results in increasing of the path length $[h(x)]$. In simple words, we are feeding the model with unnecessary traffic to make our attack point a needle in a stack of hay: thus, 'hiding' it and normalizing it. This could be understood better when we shift from a tree based approach of isolation forests into a geometric translation of the feature space.
+            </p>
+
+            <div class="image-wrapper">
+                <img src="data-poisoning-beforevsafter.png" alt="Geometric Translation of Feature Space Ingestion Noise"style="background-color:#6cb3b5;padding:30px;max-width: 50%; height: auto;">
+                <div class="caption">Figure 3: Boundary translation shifts mapping cluster variance pre and post background poison load.</div>
+            </div>
+
+            <p>
+            As the number of lines to isolate a data point increase, it's synchronous to the increment of path length in our flowchart example, thus making the model shift closer to 0, malicious passing as normal input. <br><br>When the algorithm performs its next automated retraining, it ingests this corrupted data store. The random decision trees are forced to build deeper, more erratic partitions just to handle the artificial noise density. The model absorbs this injected variance, <span class="highlight"> stretching its definition of "normal" and causing true anomalies to fall below the classification threshold.</span>
+            </p>
+            <p>
+            Consequently, when the attacker executes their actual high-severity objective (such as conducting lateral privilege escalation), the modified decision trees require a significantly higher number of splits to isolate the malicious data point. The average path length $E(h(x))$ remains long, driving the mathematical anomaly score safely below 0.5.
+            </p>
+            For the mathematics side of the model exploit, click below:
+            <div class="math-block">
+                <div class="formula-toggle">Mathematical-loophole</div>
+                <div class="formula-content">                    
+                    There's an inverse proportion between the anomaly score and path length:
+                    $$s(x,n) \propto \frac{1}{E(h(x))}$$
+                    <ul>
+                    <li>As $E(h(x)) \to 0$ (very short path length, easily isolated), the exponent approaches $0$, meaning $s(x,n) \to 2^0 = 1$ (Highly Anomalous)</li><br>
+                    <li>As $E(h(x)) \to \infty$ or grows deep (long path length, deeply nested), the exponent becomes a large negative number, meaning $s(x,n) \to 2^{-\infty} = 0$ (Highly Normal).</li>
+                    </ul>
+                    However, on adding "normal-looking" data points, the attacker artificially alters the underlying data distribution size $n$
+                    <br>
+                    This inflates the path length when the malicious payload is injected:
+                    $$ E(h(x_{malicious})) \gg c(n) $$
+                    $$\frac{E(h(x_{malicious}))}{c(n)} > 1 \implies -\frac{E(h(x_{malicious}))}{c(n)} < -1$$
+                    Plugging this in the original score formula:
+                    $$\boxed {s(x_{malicious},n) = 2^{\text{(a value } < -1\text{)}} < 0.5} $$
+                    Now, the score below 0.5 makes the malicious payload pass as a normal data point.
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>4. Defence Against Data Poisoning</h2>
+            <ol>
+                <li><strong>Transport Authentication:</strong> Brokers must drop unauthenticated traffic. Implement Mutual TLS (mTLS) alongside SASL/SCRAM-SHA-512 to ensure that only cryptographically verified endpoint log forwarders can write data to security topics.</li>
+                <li><strong>Secrets Controls:</strong> Avoid hardcoding pipeline configurations or storing secrets in plaintext. Use secure system environment variables or centralized secrets management instances (e.g., HashiCorp Vault) to inject transport credentials dynamically into shipping agents at runtime.</li>
+                <li><strong>Algorithmic Hardening:</strong> Shift away from completely fluid, automated dynamic retraining loops. Implement robust statistical estimators, such as Median Absolute Deviation (MAD), which natively minimize the mathematical weight of extreme outlier noise during compilation.</li>
+                <li><strong>Cross Validation:</strong> Finally, every retrained model must be rigorously cross-validated against an unmodifiable, offline "gold standard" baseline dataset to detect threshold shifts before being deployed to production.</li>
+            </ol>
+        </section>
+
+        <section>
+            <h2>5. Conclusion</h2>
+            <p>
+            Machine learning models have advanced incident response speed, but they are not magical entities; they are highly deterministic algorithms built on top of traditional data engineering infrastructure. If the pipeline feeding the model treats internal network traffic as inherently trustworthy, it hands an internal threat actor full administrative control over the model's training boundaries.
+            </p>
+        </section>
+
+        <section>
+            <h2 style="color:#3d7375 ;">Helpful Resources:</h2>
+            <ol>
+                <li> Elastic Documentation: <em><a href="https://www.elastic.co/docs/reference/beats/filebeat/kafka-output"target="_blank" style="color: #641159;font-size: 16px;">Configure the Kafka Output for Filebeat.</a></em></li><br>
+                <li> ML Conference paper: <em><a href="https://mlconference.ai/blog/real-time-anomaly-detection-with-kafka-and-isolation-forests/"target="_blank" style="color: #641159;font-size: 16px;">Real-Time Anomaly Detection with Kafka and Isolation Forests.</em></a></li><br>
+                <li> Medium Blog: <em><a href="https://medium.com/@falonnekpamegan/understanding-isolation-forest-for-anomaly-detection-c5b3ee6006ce"target="_blank" style="color: #641159;font-size: 16px;">Understanding Isolation Forest for Anomaly Detection</em></a></li><br>
+                <li> MITRE ATLAS Framework: <em><a href="https://atlas.mitre.org/techniques/AML.T0020"target="_blank" style="color: #641159;font-size: 16px;">Technique AML.T0020 - Poison Training Data.</em></a></li><br>
+                <li> Visualization Tool: <em><a href="https://excalidraw.com/"target="_blank" style="color: #641159;font-size: 16px;">Excalidraw Virtual Whiteboard.</em></a></li><br>
+
+            </ol>
+
+            <p style="font-size: 18px; margin-top: 2rem;">
+            Thank you for reading.<br>
+            <strong>— EXIT —</strong>
+            </p>
+        </section>
+    </div>
+</body>
+</html>
