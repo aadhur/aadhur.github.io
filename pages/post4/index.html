@@ -6,23 +6,8 @@
     <link rel="stylesheet" href="../style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
-        onload="renderMathInElement(document.body, {
-            delimiters: [
-              {left: '$$', right: '$$', display: true},
-              {left: '$', right: '$', display: false}
-            ]
-        });">
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll('.formula-toggle').forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    toggle.nextElementSibling.classList.toggle('open');
-                });
-            });
-        });
-    </script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script defer src="../../utils.js"></script>
 </head>
 
 <body>
