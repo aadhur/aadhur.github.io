@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>./Gift</title>
-    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="../utils/utils.css">
 </head>
 <body>
     <a href="/" class="back-link">[ < ] Homepage</a>
@@ -22,7 +22,7 @@
             </span> 
             <br> <br> We will get results similar to this: 
             <div class="image-wrapper">
-             <img src="sudo-arp.png" alt="Sudo-arp scan">
+             <img src="imgs/sudo-arp.png" alt="Sudo-arp scan">
              <p class="caption">Figure 1: Identifying the target via ARP scan.</p>
             </div>
             The results show our neighbouring network devices. 
@@ -38,7 +38,7 @@
                 nmap [IP1] [IP2] # MAC addresses with OUI as '08:00'
             </span> 
             <div class="image-wrapper">
-              <img src="nmap-scan1.png" alt="nmap-scan"> 
+              <img src="imgs/nmap-scan1.png" alt="nmap-scan"> 
               <p class="caption">Figure 2: Identifying the target machine via Nmap scan.</p>
             </div>
             The scan results show only one of them has open services. That is our target machine.
@@ -50,14 +50,14 @@
                 nmap -sV -sS [IP]
             </span>
             <div class="image-wrapper">
-                <img src="1.png" alt="detailed-nmap"> 
+                <img src="imgs/1.png" alt="detailed-nmap"> 
                 <p class="caption">Figure 3: Identifying the open services via Nmap scan.</p>
             </div>
             The results show two ports open. 
             <br><strong>sV</strong> - shows the service version its running on (Used for identifying exploits in older software)
             <br>Let's visit the http port:
             <div class="image-wrapper">
-                <img src="http.png" alt="Web-interface-msg">
+                <img src="imgs/http.png" alt="Web-interface-msg">
                 <p class="caption">Figure 4: HTTP web-interface </p>
             </div>
             <span class="math-block">"Don't Overthink. Really, Its simple."</span>
@@ -67,7 +67,7 @@
             <h2> 3. Directory Fuzzing & Logic </h2>
             I used <code>dirb</code> for a quick directory enumeration. The results didn't give anything.
             <div class="image-wrapper">
-                <img src="2.png" alt="dirb-results"> 
+                <img src="imgs/2.png" alt="dirb-results"> 
                 <p class="caption">Figure 5: Directory enumeration results</p>
             </div>
             Eventually, I thought there was an hidden word from the capitalised letters "DORI" which could be a SSH username or password.
@@ -81,7 +81,7 @@
                 hydra -l root -P /usr/share/wordlists/rockyou.txt [IP] ssh
             </span>
             <div class="image-wrapper">
-                <img src="3.png" alt="final"> 
+                <img src="imgs/3.png" alt="final"> 
                 <p class="caption">Figure 6: Root password cracked</p>
             </div>
             I used <span class="highlight"> rockyou.txt</span> as the wordlist.
@@ -91,7 +91,7 @@
             By logging in as root via SSH, I gained full access to the machine. Since, we're already root, we can access both the user and root passwords.
             </p>
             <div class="image-wrapper">
-                <img src="final.png" alt="final"> 
+                <img src="imgs/final.png" alt="final"> 
                 <p class="caption">Figure 7: Logged in as root via SSH</p>
             </div>
         </section>
