@@ -1,0 +1,10 @@
+.interactive-container { display: flex; gap: 30px; align-items: flex-start; background: #151515; padding: 25px; border-radius: 12px; margin: 20px 0; border: 1px solid #222; }
+.controls-pane { flex: 1; min-width: 250px; }
+.viz-pane { flex: 1.5; }
+.mse-highlight { font-size: 1.2em; color: darkred; font-weight: bold; }
+input[type="range"] { width: 100%; margin: 10px 0; background: #333; height: 5px; border-radius: 3px; outline: none; -webkit-appearance: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 15px; height: 15px; background: #641159; border-radius: 50%; cursor: pointer; }
+svg { border: 1px solid #333; background-color: #111; border-radius: 8px; width: 100%; height: auto; }
+.data-point { fill: #3d7375; }
+.fit-line { stroke: #641159; stroke-width: 2; }
+.residual { stroke: darkred; stroke-dasharray: 3,3; }

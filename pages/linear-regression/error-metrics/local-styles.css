@@ -1,0 +1,13 @@
+.katex svg {
+    display: block !important;
+    background: transparent !important;
+    width: auto !important; 
+} 
+.katex * {
+    border-style: none !important;
+}
+
+.katex .frac-line{
+    border-bottom-style: solid !important; 
+}
+svg { border: 2px solid #333; background-color: #000000; border-radius: 8px; width: 60%; display: block; margin: 0 auto;}

@@ -1,4 +1,4 @@
-# ~/notes Blog
+# ~/notes 
 
 This is my personal blog where I document my learning journey in topics that interest me - ranging from machine learning to data visualization and cybersecurity.
 
@@ -8,5 +8,4 @@ This is my personal blog where I document my learning journey in topics that int
 - **D3.js** – Data visualization
 - **KaTeX** – Math typesetting
 
-## Live Blog
 🔗 [Visit my blog](https://aadhur.github.io/)
